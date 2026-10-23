@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+exports/
+web/node_modules/
+web/dist/
+web/.wrangler/
+web/test-results/
+web/worker-configuration.d.ts
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+*.log

@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pixel-number",
+  "main": "dist/worker.mjs",
+  "account_id": "9c7a68cd84c8ea891bf7a28ac1f167bf",
+  "compatibility_date": "2026-10-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [{"pattern": "pixels.mcgeelee.com", "custom_domain": true}],
+  "observability": {"enabled": true, "head_sampling_rate": 0.1},
+  "build": {"command": "node scripts/build.mjs"}
+}

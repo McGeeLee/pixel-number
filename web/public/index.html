@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f5ef">
+  <meta name="description" content="把一个数字展开成一幅 RGB565 图片。实时预览、像素探索、图片与编号互转，全部在浏览器本地完成。">
+  <title>Pixel Number · 数字像素实验室</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="./"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Pixel Number<span class="edition">LAB / 01</span></a>
+      <a class="home" href="https://mcgeelee.com">McGee 的主页 <span aria-hidden="true">↗</span></a>
+    </header>
+    <main>
+      <section class="intro">
+        <div><p class="eyebrow">一个数字，2,073,600 个像素</p><h1>把数字，展开成画面<span class="title-dot">。</span></h1><p class="subtitle">拖动、跳转、放大。在所有可能的像素里，找到你想保存的一帧。</p></div>
+        <div class="local-badge"><span class="live-dot"></span><div>完全本地处理<small>图片和编号不会上传</small></div></div>
+      </section>
+
+      <section class="input-card" aria-label="数字输入与浏览">
+        <div class="section-line"><label for="number">01 <strong>图像编号</strong></label><span id="numberHint">每个整数，都对应一幅确定的画面</span></div>
+        <form id="numberForm" class="number-row">
+          <select id="base" aria-label="输入进制"><option value="10">十进制</option><option value="16">十六进制</option></select>
+          <input id="number" value="0" maxlength="4096" autocomplete="off" spellcheck="false" aria-label="图像编号" placeholder="输入一个非负整数…">
+          <button id="generate" class="primary" type="submit">生成画面 <span aria-hidden="true">↵</span></button>
+        </form>
+        <div class="browse-row">
+          <div class="step-field"><label for="step">步长</label><input id="step" value="1" maxlength="4096" spellcheck="false" aria-label="枚举步长"><button id="applyStep" class="text-button">应用</button></div>
+          <div class="presets" aria-label="画面预设"><button data-preset="black">全黑</button><button data-preset="white">全白</button><button data-preset="palette">色谱示例</button><button data-preset="random" class="random">↝ 随机跳转</button></div>
+        </div>
+        <div class="slider-row"><button id="previous" class="icon-button" aria-label="上一张">←</button><input id="slider" type="range" min="0" max="1000" value="0" step="1" aria-label="局部编号滑条"><button id="next" class="icon-button" aria-label="下一张">→</button></div>
+        <div class="slider-caption"><span>浏览当前基点附近 · 最多前后 1000 步</span><output id="offset">偏移 +0</output></div>
+      </section>
+
+      <section class="workspace" aria-label="图片预览与像素信息">
+        <div class="preview-card">
+          <div class="preview-toolbar"><div><span class="section-number">02</span><strong>画面预览</strong><span id="renderState" class="state-pill">准备中</span></div><select id="zoom" aria-label="预览缩放"><option value="fit">适应窗口</option><option value="1">100%</option><option value="2">200%</option><option value="4">400%</option></select></div>
+          <div id="viewport" class="viewport"><canvas id="canvas" width="1920" height="1080" aria-label="当前编号对应的 RGB565 图片"></canvas></div>
+          <div class="preview-footer"><span id="dimensions">1920 × 1080</span><span id="timing">RGB565 · 65,536 色</span></div>
+        </div>
+        <aside class="inspector">
+          <div class="inspector-heading"><span class="section-number">03</span><strong>像素放大镜</strong></div>
+          <select id="inspectMode" aria-label="放大镜观察位置"><option value="last">最后一个像素</option><option value="first">第一个像素</option><option value="hover">跟随鼠标</option></select>
+          <div class="loupe-wrap"><canvas id="loupe" width="176" height="176" aria-label="选中像素附近的放大预览"></canvas></div>
+          <div class="pixel-heading"><span id="swatch" class="swatch"></span><code id="pixelHex">#000000</code><span id="coordinates">1919, 1079</span></div>
+          <dl class="pixel-details"><div><dt>RGB</dt><dd id="pixelRGB">0 / 0 / 0</dd></div><div><dt>16 位色号</dt><dd id="pixelCode">0 · 0x0000</dd></div></dl>
+          <p class="inspector-note">每次 +1 通常只改变一个像素。<br>试试增大步长，或者随机跳转。</p>
+        </aside>
+      </section>
+
+      <section class="controls-card" aria-label="图片参数和保存">
+        <div class="settings-row"><div class="size-field"><label for="width">尺寸</label><input id="width" type="number" min="1" max="16777216" value="1920" aria-label="图片宽度"><span>×</span><input id="height" type="number" min="1" max="16777216" value="1080" aria-label="图片高度"><button id="fullHD" class="text-button">1080p</button></div><label class="order-field">像素顺序<select id="order"><option value="msb">高位在左上 · 末像素先变</option><option value="lsb">低位在左上 · 首像素先变</option></select></label></div>
+        <div class="actions-row"><div class="imports"><button id="importImage">↑ 导入图片</button><button id="openNumber">打开编号</button><input id="imageFile" type="file" accept="image/png,image/jpeg,image/webp,image/bmp" hidden><input id="numberFile" type="file" accept=".json,.txt" hidden></div><div class="exports"><button id="batch">批量导出</button><button id="saveText">导出 TXT</button><button id="saveSession">保存编号</button><button id="savePNG" class="primary">↓ 保存 PNG</button></div></div>
+        <div class="status-row"><span id="status" role="status" aria-live="polite">正在启动本地图片引擎…</span><button id="cancel" class="text-button" hidden>取消任务</button></div>
+      </section>
+
+      <details class="help"><summary>这是什么？怎样开始探索？<span>＋</span></summary><div class="help-grid"><div><h2>数字就是画面</h2><p>固定尺寸和顺序后，每个像素占一位 65536 进制数。数字 0 是全黑；65535 让末像素变白；65536 会进位到前一个像素。数值 1 是暗蓝色，并非灰色。</p></div><div><h2>按自己的节奏浏览</h2><p>输入数字可精确跳转，滑条浏览基点附近。步长支持 1、65536、2^32 或 65536^100。调尺寸会重新解释数字；调预览缩放不影响保存尺寸。</p></div><div><h2>保存，也能继续</h2><p>PNG 可重新导入恢复编号。JSON 编号文件同时保存尺寸、顺序和步长，兼容桌面版。超大编号只显示摘要，完整数字用 TXT 导入、导出。</p></div><div><h2>全部留在你的设备上</h2><p>普通图片导入时保留尺寸、量化为 RGB565，透明部分合成到黑色。网页版每批最多 100 张且原始像素总量不超过 256 MiB，生成一个 ZIP 下载。</p></div></div></details>
+    </main>
+    <footer class="footer"><span>Pixel Number <span class="muted">/</span> 一个关于可能性的像素实验</span><span>RGB565 · LOCAL FIRST</span></footer>
+  </div>
+
+  <dialog id="batchDialog"><form id="batchForm"><div class="dialog-title"><h2>保存一段可能性</h2><button type="button" id="closeDialog" class="icon-button" aria-label="关闭批量导出">×</button></div><p>从当前编号开始，按照当前步长生成，打包成 ZIP。</p><label for="count">导出张数</label><input id="count" type="number" min="1" max="100" value="10" required><small id="batchHint"></small><button class="primary" type="submit">生成并下载 ZIP</button></form></dialog>
+</body>
+</html>

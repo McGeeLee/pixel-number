@@ -1,0 +1,11 @@
+{
+  "url": "https://pixels.mcgeelee.com",
+  "worker": "pixel-number",
+  "deployed_at": "2026-10-23T06:11:23.748357Z",
+  "deployment_id": "10fd3e96b62047bfbc22196e69fd110f",
+  "worker_etag": "a41a4f81ff9ccbc01bd89dc19e8d476a2bd5d91ddadc860853f5682e3817ad88",
+  "domain_id": "a4dd6790031ab3dd56cf32b178f284b43daf462d",
+  "workers_dev_enabled": false,
+  "preview_urls_enabled": false,
+  "method": "Cloudflare plugin API"
+}
