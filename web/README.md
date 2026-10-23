@@ -19,7 +19,7 @@
 
 ## 本地开发
 
-需要 Node.js 22+ 和 pnpm。纯前端及测试不依赖 npm 包；Cloudflare 开发工具在 devDependencies 中。
+开发与自动部署固定使用 Node.js 24.19.0、pnpm 11.25.0（见 `.node-version` 和 `package.json`）。纯前端及测试不依赖 npm 包；Cloudflare 开发工具在 devDependencies 中。
 
 ```sh
 pnpm install
@@ -42,7 +42,26 @@ pnpm exec wrangler deploy --dry-run
 - `workers.dev` 和预览子域名均关闭。
 - 网站原有首页及其他应用未被替换。
 
-首次发布通过已连接的 Cloudflare 插件完成，使用标准 multipart Worker 上传与自定义域名接口，没有把登录凭证写入源码。后续可继续通过插件部署；也可以使用本人已经认证的 Wrangler：
+### GitHub 自动部署
+
+Cloudflare Workers Builds 已连接 [McGeeLee/pixel-number](https://github.com/McGeeLee/pixel-number)。推送到 `main`（包括合并 PR）会触发构建，测试通过后自动更新线上网站。
+
+| 设置 | 值 |
+| --- | --- |
+| 生产分支 | `main` |
+| 构建目录 | `web` |
+| 构建命令 | `pnpm install --frozen-lockfile && pnpm test` |
+| 部署命令 | `pnpm exec wrangler deploy` |
+| 监听路径 | 全部路径 |
+| Node.js / pnpm | `24.19.0` / `11.25.0` |
+
+Cloudflare 构建变量设置 `NODE_VERSION=24.19.0`、`PNPM_VERSION=11.25.0`、`SKIP_DEPENDENCY_INSTALL=1`，由上面的构建命令按锁文件安装依赖。构建失败时不会执行部署，线上继续提供上一版。其他分支不触发生产部署。
+
+在 Cloudflare 的 **Workers & Pages → pixel-number → Deployments / Settings → Builds** 中查看构建结果、日志及连接配置。部署使用 Cloudflare 内保存的构建凭证，仓库中不存放令牌。
+
+### 手动部署
+
+首次发布通过已连接的 Cloudflare 插件完成。需要手动部署时，可以使用本人已经认证的 Wrangler：
 
 ```sh
 pnpm build
