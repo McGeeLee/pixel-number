@@ -35,13 +35,15 @@ pnpm exec wrangler pages dev dist-pages
 
 `_headers` 保留 `connect-src 'none'`、仅同源脚本和 Web Worker、禁止摄像头/麦克风/定位、无 Referrer，以及每次重新验证的浏览器缓存策略。Pages 自动提供 MIME、ETag、HEAD 和条件缓存响应；显式 `404.html` 保证未知路径返回 404，避免回退到首页。参考 [Pages 响应头](https://developers.cloudflare.com/pages/configuration/headers/) 和 [静态文件及 404 行为](https://developers.cloudflare.com/pages/configuration/serving-pages/)。
 
+应用资源采用固定文件名，因此使用 `Cache-Control: public, no-cache, max-age=0, must-revalidate`。`no-cache` 允许保存副本，但要求复用前验证；即使自定义域名的 Browser Cache TTL 调高了 `max-age`，保留下来的 `no-cache` 仍要求浏览器验证。部署后应检查自定义域名实际返回的头，不能只依据 `pages.dev`；显式覆盖响应头的规则仍需单独处理。此设置仅作用于本站，不修改域名区域的全局缓存配置。参考 [Cloudflare Cache-Control 指令及 Browser Cache TTL](https://developers.cloudflare.com/cache/concepts/cache-control/)。
+
 ## Pages 部署
 
 - 目标 Pages 项目：`pixel-number`
 - 正式自定义域名：`pixels.mcgeelee.com`
 - 构建目录：`web`
 - 静态输出目录：`dist-pages`（相对 `web`）
-- 本仓库配置不等于远端已部署；域名迁移及远端验证完成后才能确认切换成功。
+- 2026-10-24 已完成远端 Pages 迁移；`pixels.mcgeelee.com` 的域名、所有权验证与证书状态均为 `active`。
 
 ```sh
 cd web
@@ -54,9 +56,9 @@ pnpm exec wrangler pages deploy dist-pages --project-name pixel-number --branch 
 
 ### 自动部署配置
 
-旧站使用 Cloudflare Workers Builds 连接 [McGeeLee/pixel-number](https://github.com/McGeeLee/pixel-number) 的 `main` 分支。迁移时需要关闭旧 Worker 的构建触发器，防止后续提交恢复旧部署。仓库没有 GitHub Actions 工作流。
+Cloudflare Pages 原生 Git 集成已连接 [McGeeLee/pixel-number](https://github.com/McGeeLee/pixel-number) 的 `main` 分支。旧 Workers Builds 配置已移除，旧 Worker 已解绑域名且 `workers.dev` 关闭；旧 Worker 对象暂留，删除需另行确认。仓库没有 GitHub Actions 工作流。
 
-如为 Pages 配置 Git 集成，使用生产分支 `main`、根目录 `web`、构建命令 `pnpm install --frozen-lockfile && pnpm test`、输出目录 `dist-pages`。若使用 Direct Upload，应在 CI 中运行上面的明确项目及分支的 `wrangler pages deploy` 命令。自动部署是否启用以远端项目配置为准。
+Pages Git 集成使用生产分支 `main`、根目录 `web`、构建命令 `pnpm install --frozen-lockfile && pnpm test`、输出目录 `dist-pages`；生产推送自动部署已开启，其他分支预览关闭。首次云端构建部署 `b5cf6c5a-07a0-4dc6-b030-f223dca362d2` 成功，`uses_functions=false`。
 
 Node.js / pnpm 版本保持 `24.19.0` / `11.25.0`。自动构建可设置 `NODE_VERSION=24.19.0`、`PNPM_VERSION=11.25.0`、`SKIP_DEPENDENCY_INSTALL=1`；认证凭证仅留在平台或 CI 的受保护变量中。
 

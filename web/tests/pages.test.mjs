@@ -16,7 +16,7 @@ test('Pages retains local-only policy and an explicit 404 instead of SPA fallbac
   const headers = await readFile(new URL('_headers', output), 'utf8');
   assert.match(headers, /^\/\*\n/);
   for (const expected of [
-    'Cache-Control: public, max-age=0, must-revalidate',
+    'Cache-Control: public, no-cache, max-age=0, must-revalidate',
     'X-Content-Type-Options: nosniff',
     'Referrer-Policy: no-referrer',
     'Permissions-Policy: camera=(), microphone=(), geolocation=()',
