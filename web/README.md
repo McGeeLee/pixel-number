@@ -35,7 +35,7 @@ pnpm exec wrangler pages dev dist-pages
 
 `_headers` 保留 `connect-src 'none'`、仅同源脚本和 Web Worker、禁止摄像头/麦克风/定位、无 Referrer，以及每次重新验证的浏览器缓存策略。Pages 自动提供 MIME、ETag、HEAD 和条件缓存响应；显式 `404.html` 保证未知路径返回 404，避免回退到首页。参考 [Pages 响应头](https://developers.cloudflare.com/pages/configuration/headers/) 和 [静态文件及 404 行为](https://developers.cloudflare.com/pages/configuration/serving-pages/)。
 
-应用资源采用固定文件名，因此使用 `Cache-Control: public, no-cache, max-age=0, must-revalidate`。`no-cache` 允许保存副本，但要求复用前验证；即使自定义域名的 Browser Cache TTL 调高了 `max-age`，保留下来的 `no-cache` 仍要求浏览器验证。部署后应检查自定义域名实际返回的头，不能只依据 `pages.dev`；显式覆盖响应头的规则仍需单独处理。此设置仅作用于本站，不修改域名区域的全局缓存配置。参考 [Cloudflare Cache-Control 指令及 Browser Cache TTL](https://developers.cloudflare.com/cache/concepts/cache-control/)。
+应用资源采用固定文件名，因此使用 `Cache-Control: public, no-cache, max-age=0, must-revalidate`。`no-cache` 允许保存副本，但要求复用前验证。迁移时实测发现区域的 4 小时 Browser Cache TTL 会提高 `max-age` 并移除 `no-cache`，仅修改 `_headers` 不足以保证更新及时。现已新增仅匹配 `pixels.mcgeelee.com` 的 Cache Rule，将 `browser_ttl` 设为 `respect_origin`；2026-10-24 已在线验证正式域名返回 `public, no-cache, max-age=0, must-revalidate`。该规则不改变区域全局缓存设置，也不作用于其他主机名。后续发布仍应检查正式域名的响应头，不能只依据 `pages.dev`。参考 [Cloudflare Cache-Control 指令及 Browser Cache TTL](https://developers.cloudflare.com/cache/concepts/cache-control/)。
 
 ## Pages 部署
 
@@ -56,7 +56,7 @@ pnpm exec wrangler pages deploy dist-pages --project-name pixel-number --branch 
 
 ### 自动部署配置
 
-Cloudflare Pages 原生 Git 集成已连接 [McGeeLee/pixel-number](https://github.com/McGeeLee/pixel-number) 的 `main` 分支。旧 Workers Builds 配置已移除，旧 Worker 已解绑域名且 `workers.dev` 关闭；旧 Worker 对象暂留，删除需另行确认。仓库没有 GitHub Actions 工作流。
+Cloudflare Pages 原生 Git 集成已连接 [McGeeLee/pixel-number](https://github.com/McGeeLee/pixel-number) 的 `main` 分支。旧 Workers Builds 配置已移除；经确认，旧 `pixel-number` Worker 已于 2026-10-24 永久删除，网站由 Pages 提供服务。仓库没有 GitHub Actions 工作流。
 
 Pages Git 集成使用生产分支 `main`、根目录 `web`、构建命令 `pnpm install --frozen-lockfile && pnpm test`、输出目录 `dist-pages`；生产推送自动部署已开启，其他分支预览关闭。首次云端构建部署 `b5cf6c5a-07a0-4dc6-b030-f223dca362d2` 成功，`uses_functions=false`。
 
@@ -64,9 +64,9 @@ Node.js / pnpm 版本保持 `24.19.0` / `11.25.0`。自动构建可设置 `NODE_
 
 ### 旧 Worker 回滚材料
 
-原始 Worker 构建保留为 `scripts/build-worker.mjs`，配置保留为 `wrangler.worker.jsonc`，不会进入 Pages 产物。`pnpm build:worker` 仍可生成 `dist/worker.mjs`。旧部署记录 `deployment.json` 仅为历史记录。
+远端旧 Worker 已删除，本地原始构建仍保留为 `scripts/build-worker.mjs`，配置保留为 `wrangler.worker.jsonc`，不会进入 Pages 产物。`pnpm build:worker` 仍可生成 `dist/worker.mjs`。旧部署记录 `deployment.json` 仅为历史记录。
 
-如需回滚，先协调 Pages 域名绑定，再显式使用 `pnpm exec wrangler deploy --config wrangler.worker.jsonc`；这不是默认部署流程。迁移期间保留回滚材料，不删除六个应用资源。
+如需恢复 Worker 托管，需要重新创建 Worker 并协调 Pages 域名绑定，再显式使用 `pnpm exec wrangler deploy --config wrangler.worker.jsonc`；这不是默认部署流程。本地回滚材料和六个应用资源继续保留。
 
 ## Pages 迁移验证
 
