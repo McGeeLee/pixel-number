@@ -5,6 +5,7 @@ __pycache__/
 exports/
 web/node_modules/
 web/dist/
+web/dist-pages/
 web/.wrangler/
 web/test-results/
 web/worker-configuration.d.ts

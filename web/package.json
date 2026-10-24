@@ -6,9 +6,10 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node scripts/build.mjs && node --test tests/*.test.mjs",
+    "build:worker": "node scripts/build-worker.mjs",
+    "test": "node scripts/build.mjs && node scripts/build-worker.mjs && node --test tests/*.test.mjs",
     "dev": "node scripts/serve.mjs",
-    "deploy": "wrangler deploy"
+    "deploy": "node scripts/build.mjs && wrangler pages deploy dist-pages --project-name pixel-number --branch main"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261022.1",

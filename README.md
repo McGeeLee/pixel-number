@@ -10,7 +10,7 @@
 
 数字转换、图片导入、PNG / JSON / TXT 导出和批量 ZIP 均在浏览器本地执行，图片和编号不会上传。网页源码及 Cloudflare 配置位于 `web/`，参见 [网页版说明](web/README.md)。网页版 JSON 与桌面版互通。
 
-网站通过 Cloudflare Workers Builds 自动部署：推送到本仓库的 `main` 分支后，先安装锁定依赖并运行网页版测试，成功后更新线上网站。
+网页版默认生成 Cloudflare Pages 纯静态产物，不运行服务端 Worker。部署及自动构建设置见 [网页版说明](web/README.md)；旧 Worker 构建材料保留供回滚。
 
 ## 启动
 
